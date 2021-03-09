@@ -1,7 +1,7 @@
-# virtual_desktop_enhancer
+
+# virtual_desktop_enhancer <img src="https://github.com/snaphat/virtual_desktop_enhancer/blob/main/app.ico" width="32" />
 
 ## About
-
 Adds QoL improvements to Windows Virtual Desktop Implementation.
 
 - Adds shortcut keys for moving windows around virtual desktops.
