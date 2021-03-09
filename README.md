@@ -19,3 +19,7 @@ Adds QoL improvements to Windows Virtual Desktop Implementation.
 | Win-Alt-Right      | Move window to the virtual desktop on the right.          |
 | ctrl-Win-Alt-Left  | Move window & Switch to the virtual desktop on the left.  |
 | ctrl-Win-Alt-Right | Move window & Switch to the virtual desktop on the right. |
+
+## Images
+![Virtual Desktop 1](https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/1.png)
+![Virtual Desktop 2](https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/2.png)
