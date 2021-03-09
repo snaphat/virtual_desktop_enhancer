@@ -9,22 +9,26 @@ IfExist, %I_Icon%
     Menu, Tray, Icon, %I_Icon%
 
 ; initiate splash on start.
+gtitle:="Splash123"
+gDesktopNum := "" ; Splash variable.
+gsec := 0 ; counter for hiding GUI.
+gmutex := CreateMutex() ; Mutex for fixing timing issues with multiple threads.
 GuiSplash()
 
 ; setup key hooks...
 
 ; move to left desktop with splash.
 ^#Left:: ; alt-left.
-    Send {LWin down}{Ctrl down}{Left}{Ctrl up}{LWin up}
     id := CurDesktop() - 1
+    Send {LWin down}{Ctrl down}{Left}{Ctrl up}{LWin up}
     if (id > 0) ; Bounds check.
         GuiSplash()
 Return
 
 ; move to right desktop with splash.
 ^#Right:: ; alt-right.
-    Send {LWin down}{Ctrl down}{Right}{Ctrl up}{LWin up}
     id := CurDesktop() + 1
+    Send {LWin down}{Ctrl down}{Right}{Ctrl up}{LWin up}
     if (id < NumDesktops()+1) ; Bounds check.
         GuiSplash()
 Return
@@ -156,28 +160,24 @@ unlock(mutex) {
 
 ; Splash screen
 GuiSplash(){
-    Static
-    title:="Splash123"
-    global DesktopNum ; Splash variable.
-    global sec := 0 ; counter for hiding GUI.
-    global mutex := CreateMutex() ; Mutex for fixing timing issues with multiple threads.
+    global
 
     ; Lazy create GUI.
-    if not WinExist(title) {
+    if not WinExist(gtitle) {
         Gui, Color, 0000FF
         Gui, +ToolWindow -Caption +AlwaysOnTop
         Gui, Font, S120 w2000, "Verdana"
         num := CurDesktop()
-        Gui, Add, Text, cWhite vDesktopNum, %num%
-        Gui, Show, Center NA, %title%
-        WinSet, Transparent, 75, %title%
+        Gui, Add, Text, cWhite vgDesktopNum, %num%
+        Gui, Show, Center NA, %gtitle%
+        WinSet, Transparent, 75, %gtitle%
         Gui, Hide
     }
 
     ; Update Gui display before starting update thread.
     num := CurDesktop()
-    GuiControl,,DesktopNum, %num%
-    Gui, Show, NA, %title%
+    GuiControl,,vgDesktopNum, %num%
+    Gui, Show, NA, %gtitle%
 
     ; Start thread that will setup timer (Don't stall this thread).
     SetTimer, guiHelp, % 10 ; trigger next gui at 10ms interval (only once though).
@@ -185,34 +185,35 @@ GuiSplash(){
     ; Thread for starting guiUpdater.
     guiHelp:
         ; Lock for consistency. We don't want to modify the guiUpdater timer if its thread currently running.
-        lock(mutex)
+        lock(mgutex)
         SetTimer, guiHelp, off
         SetTimer, guiUpdater, % 10 ; trigger next gui at 10ms interval.
-        unlock(mutex)
+        unlock(gmutex)
         Return
 
     ; Thread for updating the GUI.
     guiUpdater:
         ; Lock for consistency. We shouldn't be running until the guiHelp thread has setup our timer.
-        lock(mutex)
-        static num_store := 1 ; store the last known state.
-        sec := sec + 10 ; increment the time for hiding the splash.
+        lock(gmutex)
+        static num_store := 0 ; store the last known state.
+        gsec := gsec + 10 ; increment the time for hiding the splash.
 
         ; Check if the desktop number has changed then update (Avoids Visual blinking).
         num := CurDesktop()
         if (num != num_store) {
-            sec = 0 ; Reset Counter.
+            gsec := 0 ; Reset Counter.
             num_store := num
-            GuiControl,,DesktopNum, %num%
-            Gui, Show, NA, %title%
+            GuiControl,,gDesktopNum, %num%
+            Gui, Show, NA, %gtitle%
         }
 
         ; Hide the splash after 1000ms.
-        if (sec >= 1000) {
-            sec = 0 ; Reset counter.
+        if (gsec >= 650) {
+            gsec := 0 ; Reset counter.
+            num_store := 0
             SetTimer, guiUpdater, off
             Gui, Hide
         }
-        unlock(mutex)
+        unlock(gmutex)
         Return
 }
