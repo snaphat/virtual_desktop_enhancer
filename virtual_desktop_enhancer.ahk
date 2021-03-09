@@ -8,6 +8,12 @@ I_Icon = app.ico
 IfExist, %I_Icon%
     Menu, Tray, Icon, %I_Icon%
 
+if not A_IsAdmin
+{
+    Run *RunAs "%A_ScriptFullPath%"  ; Requires v1.0.92.01+
+    ExitApp
+}
+
 ; initiate splash on start.
 gtitle:="Splash123"
 gDesktopNum := "" ; Splash variable.
