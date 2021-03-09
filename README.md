@@ -20,5 +20,14 @@ Adds QoL improvements to Windows Virtual Desktop Implementation.
 | ctrl-Win-Alt-Left  | Move window & Switch to the virtual desktop on the left.  |
 | ctrl-Win-Alt-Right | Move window & Switch to the virtual desktop on the right. |
 
+To autostart virtual_desktop_enhancer on login, run:
+```
+_INSTALL.bat
+```
+To remove autostart of virtual_desktop_enhancer on login, run:
+```
+_UNINSTALL.bat
+```
+
 ## Images
 <img src="https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/1.png" width="650" /><img src="https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/2.png" width="650" />
