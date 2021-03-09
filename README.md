@@ -21,4 +21,4 @@ Adds QoL improvements to Windows Virtual Desktop Implementation.
 | ctrl-Win-Alt-Right | Move window & Switch to the virtual desktop on the right. |
 
 ## Images
-<img src="https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/1.png" width="450" /><img src="https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/2.png" width="450" />
+<img src="https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/1.png" width="650" /><img src="https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/2.png" width="650" />
