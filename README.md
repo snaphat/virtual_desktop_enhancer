@@ -9,6 +9,8 @@ Adds QoL improvements to Windows Virtual Desktop Implementation.
 - Simple & Fast unlike other existing solutions.
 - Does not cause spurious taskbar alerts unlike other existing solutions.
 
+*Note: Elevated privileges are required to move elevated (admin) windows.*
+
 ## Usage
 
 | Shortcut Keys      | Description                                               |
