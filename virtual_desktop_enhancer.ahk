@@ -8,7 +8,7 @@ I_Icon = app.ico
 IfExist, %I_Icon%
     Menu, Tray, Icon, %I_Icon%
 
-if not A_IsAdmin
+if (not A_IsAdmin)
 {
     Run *RunAs "%A_ScriptFullPath%"  ; Requires v1.0.92.01+
     ExitApp
@@ -26,62 +26,70 @@ GuiSplash()
 ; move to left desktop with splash.
 ^#Left:: ; alt-left.
     id := CurDesktop() - 1
-    Send {LWin down}{Ctrl down}{Left}{Ctrl up}{LWin up}
-    if (id > 0) ; Bounds check.
+    if (id > 0) { ; Bounds check.
+        Send {LWin down}{Ctrl down}{Left down} ; Separated for spurious wakeups.
         GuiSplash()
+        WinActivate, A ; Fixes Spurious Wakeups.
+        Send {LWin up}{Ctrl up}{Left up}
+    }
+
 Return
 
 ; move to right desktop with splash.
 ^#Right:: ; alt-right.
     id := CurDesktop() + 1
-    Send {LWin down}{Ctrl down}{Right}{Ctrl up}{LWin up}
-    if (id < NumDesktops()+1) ; Bounds check.
+    if (id < NumDesktops()+1) { ; Bounds check.
+        Send {LWin down}{Ctrl down}{Right down} ; Separated for spurious wakeups.
         GuiSplash()
+        WinActivate, A ; Fixes Spurious Wakeups.
+        Send {LWin up}{Ctrl up}{Right up}
+    }
 Return
 
 ; move active window to left desktop (no splash).
 !#Left:: ; win-alt-left.
-    WinGetTitle, Title, A
-    WinGet, hwnd, ID, A
     id := CurDesktop() - 1
     if (id > 0) { ; Bounds check.
+        WinGet, hwnd, ID, A
         MoveToDesktop(hwnd, id)
+        hwnd := WinActive("A")
+        SelectNextWindow() ; allows all windows on a desktop be moved easily.
     }
 Return
 
 ; move active window to right desktop (no splash).
 !#Right:: ; win-alt-right.
-    WinGetTitle, Title, A
-    WinGet, hwnd, ID, A
     id := CurDesktop() + 1
     if (id < NumDesktops()+1) { ; Bounds check.
+        WinGet, hwnd, ID, A
         MoveToDesktop(hwnd, id)
+        SelectNextWindow() ; allows all windows on a desktop be moved easily.
     }
 Return
 
 ; move active window to left desktop and follow.
 ^!#Left:: ; ctrl-win-alt-left.
-    WinGetTitle, Title, A
-    WinGet, hwnd, ID, A
     id := CurDesktop() - 1
     if (id > 0) { ; Bounds check.
+        WinGet, hwnd, ID, A
         MoveToDesktop(hwnd, id)
-        Send {LWin down}{Ctrl down}{Left}{Ctrl up}{LWin up}
+        Send {LWin down}{Ctrl down}{Left down}
         GuiSplash()
-        WinActivate, %Title%
+        Send {LWin up}{Ctrl up}{Left up}
+        WinActivate, ahk_id %hwnd%
     }
 Return
 
 ; move active window to right desktop and follow.
 ^!#Right:: ; ctrl-win-alt-right.
-    WinGetTitle, Title, A
-    WinGet, hwnd, ID, A
     id := CurDesktop() + 1
     if (id < NumDesktops()+1) { ; Bounds check.
+        WinGet, hwnd, ID, A
         MoveToDesktop(hwnd, id)
-        Send {LWin down}{Ctrl down}{Right}{Ctrl up}{LWin up}
+        Send {LWin down}{Ctrl down}{Right down}
         GuiSplash()
-        WinActivate, %Title%
+        Send {LWin up}{Ctrl up}{Right up}
+        WinActivate, ahk_id %hwnd%
     }
 Return
 
@@ -105,26 +113,12 @@ CurDesktop() {
     return 1 ; if no count, assume only 1 desktop.
 }
 
-MoveToDesktop(hwnd, id)
-{
+MoveToDesktop(hwnd, id) {
     global
 
-    ; Check window IDs (only attempt to move "valid" windows.
-    WinGet, dwStyle, Style, ahk_id %hwnd%
-    if ((dwStyle&0x08000000) || !(dwStyle&0x10000000)) {
-        return false
-    }
-    WinGet, dwExStyle, ExStyle, ahk_id %hwnd%
-    if (dwExStyle & 0x00000080) {
-        return false
-    }
-    WinGetClass, szClass, ahk_id %hwnd%
-    if (szClass = "TApplication") {
-        return false
-    }
-    WinGetTitle, title, ahk_id %hwnd%
-    if not (title)
-        return false
+    ; Check window IDs (only attempt to move "valid" windows.)
+    if not (IsValidWindow(hwnd))
+        return False
 
     ; Init...
     IServiceProvider := ComObjCreate("{C2F03A33-21F5-47FA-B4BB-156362A2F239}", "{6D5140C1-7436-11CE-8034-00AA006009FA}")
@@ -141,7 +135,65 @@ MoveToDesktop(hwnd, id)
     VarSetCapacity(vd_GUID, 16)
     DllCall("Ole32.dll\CLSIDFromString", "Str", "{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}", "UPtr", &vd_GUID)
     DllCall(vtable(IObjectArray,4), "UPtr", IObjectArray, "UInt", id-1, "UPtr", &vd_GUID, "UPtrP", IVirtualDesktop, "UInt")
-    DllCall(MoveViewToDesktop, "ptr", IVirtualDesktopManagerInternal, "Ptr", pView, "UPtr", IVirtualDesktop, "UInt")
+    DllCall(MoveViewToDesktop, "Ptr", IVirtualDesktopManagerInternal, "Ptr", pView, "UPtr", IVirtualDesktop, "UInt")
+}
+
+SelectNextWindow() {
+    ; Iterate windows in z-order.
+    WinGet, hwnd, ID, A
+    Loop {
+        hwnd := DllCall("GetWindow",uint,hwnd,int,2) ; 2 = GW_HWNDNEXT
+        hwnd := hwnd // 1
+
+        if (hwnd == 0) ; Ran out of windows.
+            return break
+
+        if not (IsWindowOnCurrentVirtualDesktop(hwnd))
+            continue ; Continue if window not on current desktop (or invalid).
+
+        WinActivate, ahk_id %hwnd% ; Activate next z-order window on current virtual desktop.
+        break
+    }
+}
+
+IsValidWindow(hwnd) {
+    if (hwnd == 0)
+        return False ; not a valid ID.
+
+    WinGet, dwStyle, Style, ahk_id %hwnd%
+    if ((dwStyle&0x08000000) || !(dwStyle&0x10000000))
+        return False ; no activate or not-visible.
+
+    WinGet, dwExStyle, ExStyle, ahk_id %hwnd%
+    if (dwExStyle & 0x00000080)
+        return False ; Tool Window.
+
+    WinGetClass, szClass, ahk_id %hwnd%
+    if (szClass = "TApplication")
+        return False ; Some delphi class window type.
+
+    WinGetTitle, title, ahk_id %hwnd%
+    if not (title) ; No title so not valid.
+        return False
+    return True
+}
+
+IsWindowOnCurrentVirtualDesktop(hwnd) {
+    if not IsValidWindow(hwnd)
+        return False ; not a valid Window.
+
+    ; Init...
+    IVirtualDesktopManager := ComObjCreate("{AA509086-5CA9-4C25-8F95-589D3C07B48A}", "{A5CD92FF-29BE-454C-8D04-D82879FB3F1B}")
+    IsWindowOnCurrentVirtualDesktop := vtable(IVirtualDesktopManager, 3)
+
+    ; Do Magic...
+    VarSetCapacity(val, 4, 0)
+    DllCall(IsWindowOnCurrentVirtualDesktop, "Ptr", IVirtualDesktopManager, "Ptr", hwnd, "Ptr" , &val)
+    val := NumGet(&val, "BOOL")
+    if (val)
+        return True
+    else
+        return False
 }
 
 ; Fn to index into IObjectArray objects.
@@ -165,11 +217,11 @@ unlock(mutex) {
 }
 
 ; Splash screen
-GuiSplash(){
+GuiSplash() {
     global
 
     ; Lazy create GUI.
-    if not WinExist(gtitle) {
+    if not (WinExist(gtitle)) {
         Gui, Color, 0000FF
         Gui, +ToolWindow -Caption +AlwaysOnTop
         Gui, Font, S120 w2000, "Verdana"
