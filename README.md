@@ -9,6 +9,8 @@ Adds QoL improvements to Windows Virtual Desktop Implementation.
 - Simple & Fast unlike other existing solutions.
 - Does not cause spurious taskbar alerts unlike other existing solutions.
 
+*Note: Elevated privileges are required to move elevated (admin) windows.*
+
 ## Usage
 
 | Shortcut Keys      | Description                                               |
@@ -30,4 +32,8 @@ _UNINSTALL.bat
 ```
 
 ## Images
-<img src="https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/1.png" width="650" /><img src="https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/2.png" width="650" />
+![Desktop 1](https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/1.png)
+![Desktop 2](https://github.com/snaphat/virtual_desktop_enhancer/raw/assets/2.png)
+
+## Video
+[![Watch the video](https://img.youtube.com/vi/hZiku5DR0j4/maxresdefault.jpg)](https://www.youtube.com/watch?v=hZiku5DR0j4)
