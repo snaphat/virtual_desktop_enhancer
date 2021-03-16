@@ -5,7 +5,7 @@
 Adds QoL improvements to Windows Virtual Desktop Implementation.
 
 - Adds shortcut keys for moving windows around virtual desktops.
-- Adds a 1 second splash indicating the current desktop.
+- Adds a 650 millisecond splash indicating the current desktop.
 - Simple & Fast unlike other existing solutions.
 - Does not cause spurious taskbar alerts unlike other existing solutions.
 
