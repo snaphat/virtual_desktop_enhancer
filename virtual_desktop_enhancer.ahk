@@ -27,23 +27,22 @@ GuiSplash()
 ^#Left:: ; alt-left.
     id := CurDesktop() - 1
     if (id > 0) { ; Bounds check.
+        GuiSplash() ; Display splash here to reduce delay.
         Send {LWin down}{Ctrl down}{Left down} ; Separated for spurious wakeups.
-        GuiSplash()
         WinActivate, A ; Fixes Spurious Wakeups.
         Send {LWin up}{Ctrl up}{Left up}
     }
-
 Return
 
 ; move to right desktop with splash.
 ^#Right:: ; alt-right.
     id := CurDesktop() + 1
     if (id < NumDesktops()+1) { ; Bounds check.
+        GuiSplash() ; Display splash here to reduce delay.
         Send {LWin down}{Ctrl down}{Right down} ; Separated for spurious wakeups.
-        GuiSplash()
         WinActivate, A ; Fixes Spurious Wakeups.
         Send {LWin up}{Ctrl up}{Right up}
-    }
+}
 Return
 
 ; move active window to left desktop (no splash).
@@ -52,7 +51,6 @@ Return
     if (id > 0) { ; Bounds check.
         WinGet, hwnd, ID, A
         MoveToDesktop(hwnd, id)
-        hwnd := WinActive("A")
         SelectNextWindow() ; allows all windows on a desktop be moved easily.
     }
 Return
@@ -73,10 +71,10 @@ Return
     if (id > 0) { ; Bounds check.
         WinGet, hwnd, ID, A
         MoveToDesktop(hwnd, id)
+        GuiSplash() ; Display splash here to reduce delay.
         Send {LWin down}{Ctrl down}{Left down}
-        GuiSplash()
-        Send {LWin up}{Ctrl up}{Left up}
         WinActivate, ahk_id %hwnd%
+        Send {LWin up}{Ctrl up}{Left up}
     }
 Return
 
@@ -86,10 +84,10 @@ Return
     if (id < NumDesktops()+1) { ; Bounds check.
         WinGet, hwnd, ID, A
         MoveToDesktop(hwnd, id)
+        GuiSplash() ; Display splash here to reduce delay.
         Send {LWin down}{Ctrl down}{Right down}
-        GuiSplash()
-        Send {LWin up}{Ctrl up}{Right up}
         WinActivate, ahk_id %hwnd%
+        Send {LWin up}{Ctrl up}{Right up}
     }
 Return
 
@@ -140,25 +138,38 @@ MoveToDesktop(hwnd, id) {
 
 SelectNextWindow() {
     ; Iterate windows in z-order.
+    foundWindow := false
     WinGet, hwnd, ID, A
     Loop {
         hwnd := DllCall("GetWindow",uint,hwnd,int,2) ; 2 = GW_HWNDNEXT
         hwnd := hwnd // 1
 
-        if (hwnd == 0) ; Ran out of windows.
-            return break
+        if (hwnd == 0)
+            break  ; Ran out of windows.
 
         if not (IsWindowOnCurrentVirtualDesktop(hwnd))
             continue ; Continue if window not on current desktop (or invalid).
 
+        foundWindow := true
         WinActivate, ahk_id %hwnd% ; Activate next z-order window on current virtual desktop.
         break
     }
 }
 
 IsValidWindow(hwnd) {
+
     if (hwnd == 0)
         return False ; not a valid ID.
+
+    VarSetCapacity(cloaked,4, 0)
+    DllCall("dwmapi\DwmGetWindowAttribute" , "Ptr", hwnd ,"UInt", 14, "Ptr", &cloaked, "UInt", 4)
+    val := NumGet(cloaked, "UInt") ; DWMWA_CLOAKED value.
+    if (val != 0) ; Needed for weeding out Windows10 Apps that are sleeping.
+        return False ; Window is Cloaked.
+
+    WinGet, stat, MinMax, ahk_id %hwnd%
+    if (stat == -1)
+        return False ; iconified so ignore.
 
     WinGet, dwStyle, Style, ahk_id %hwnd%
     if ((dwStyle&0x08000000) || !(dwStyle&0x10000000))
@@ -190,10 +201,7 @@ IsWindowOnCurrentVirtualDesktop(hwnd) {
     VarSetCapacity(val, 4, 0)
     DllCall(IsWindowOnCurrentVirtualDesktop, "Ptr", IVirtualDesktopManager, "Ptr", hwnd, "Ptr" , &val)
     val := NumGet(&val, "BOOL")
-    if (val)
-        return True
-    else
-        return False
+    return val ? true : false
 }
 
 ; Fn to index into IObjectArray objects.
@@ -222,6 +230,7 @@ GuiSplash() {
 
     ; Lazy create GUI.
     if not (WinExist(gtitle)) {
+        Gui, +E0x08000000 ; No-activate style
         Gui, Color, 0000FF
         Gui, +ToolWindow -Caption +AlwaysOnTop
         Gui, Font, S120 w2000, "Verdana"
