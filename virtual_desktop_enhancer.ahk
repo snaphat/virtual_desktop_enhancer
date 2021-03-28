@@ -8,11 +8,23 @@ I_Icon = app.ico
 IfExist, %I_Icon%
     Menu, Tray, Icon, %I_Icon%
 
+; Restart script on resolution change to fix tray icon.
+; Workaround because autohotkey icon change commands do nothing after resolution changes.
+OnMessage(0x7E, "WM_DISPLAYCHANGE")
+WM_DISPLAYCHANGE(wParam, lParam)
+{
+    sleep 5000 ; takes ~5 seconds for the resolution change to stabilize.
+    Reload
+}
+
 if (not A_IsAdmin)
 {
     Run *RunAs "%A_ScriptFullPath%"  ; Requires v1.0.92.01+
     ExitApp
 }
+
+; Remove dead tray icons.
+Tray_Refresh()
 
 ; initiate splash on start.
 gtitle:="Splash123"
@@ -90,6 +102,41 @@ Return
         Send {LWin up}{Ctrl up}{Right up}
     }
 Return
+
+; Removes dead tray icons.
+Tray_Refresh() {
+	WM_MOUSEMOVE := 0x200
+	detectHiddenWin := A_DetectHiddenWindows
+	DetectHiddenWindows, On
+
+	allTitles := ["ahk_class Shell_TrayWnd"
+			, "ahk_class NotifyIconOverflowWindow"]
+	allControls := ["ToolbarWindow321"
+				,"ToolbarWindow322"
+				,"ToolbarWindow323"
+				,"ToolbarWindow324"]
+	allIconSizes := [24,32]
+
+	for id, title in allTitles {
+		for id, controlName in allControls {
+			for id, iconSize in allIconSizes {
+				ControlGetPos, xTray,yTray,wdTray,htTray,% controlName,% title
+				y := htTray - 10
+				While (y > 0) {
+					x := wdTray - iconSize/2
+					While (x > 0) {
+						point := (y << 16) + x
+						PostMessage,% WM_MOUSEMOVE, 0,% point,% controlName,% title
+						x -= iconSize/2
+					}
+					y -= iconSize/2
+				}
+			}
+		}
+	}
+
+	DetectHiddenWindows, %detectHiddenWin%
+}
 
 ; Fn to get number of desktops (Windows has no exposed APIs).
 NumDesktops() {
@@ -239,6 +286,7 @@ GuiSplash() {
         Gui, Show, Center NA, %gtitle%
         WinSet, Transparent, 75, %gtitle%
         Gui, Hide
+        return
     }
 
     ; Update Gui display before starting update thread.
