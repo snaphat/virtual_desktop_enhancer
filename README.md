@@ -15,6 +15,16 @@ Adds QoL improvements to Windows Virtual Desktop Implementation.
 
 | Shortcut Keys      | Description                                               |
 |--------------------|-----------------------------------------------------------|
+| alt-1              | Switch to the virtual desktop 1.                          |
+| alt-2              | Switch to the virtual desktop 2.                          |
+| alt-3              | Switch to the virtual desktop 3.                          |
+| alt-4              | Switch to the virtual desktop 4.                          |
+| alt-5              | Switch to the virtual desktop 5.                          |
+| alt-6              | Switch to the virtual desktop 6.                          |
+| alt-7              | Switch to the virtual desktop 7.                          |
+| alt-8              | Switch to the virtual desktop 8.                          |
+| alt-9              | Switch to the virtual desktop 9.                          |
+| alt-0              | Switch to the virtual desktop 10.                         |
 | ctrl-Win-Left      | Switch to the virtual desktop on the left.                |
 | ctrl-Win-Right     | Switch to the virtual desktop on the right.               |
 | Win-Alt-Left       | Move window to the virtual desktop on the left.           |
