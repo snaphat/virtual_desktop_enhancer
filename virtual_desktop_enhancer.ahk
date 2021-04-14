@@ -14,6 +14,7 @@ _GetDesktopCount                 := NumGet(NumGet(_IVirtualDesktopManagerInterna
 _MoveViewToDesktop               := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+4*A_PtrSize)
 _GetCurrentDesktop               := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+6*A_PtrSize)
 _GetDesktops                     := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+7*A_PtrSize)
+_SwitchDesktop                   := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+9*A_PtrSize)
 _ImmersiveShell                  := ComObjCreate("{C2F03A33-21F5-47FA-B4BB-156362A2F239}", "{00000000-0000-0000-C000-000000000046}")
 _IApplicationViewCollection      := ComObjQuery(_ImmersiveShell,"{1841C6D7-4F9D-42C0-AF41-8747538F10E5}","{1841C6D7-4F9D-42C0-AF41-8747538F10E5}" )
 _GetViewForHwnd                  := NumGet(NumGet(_IApplicationViewCollection+0)+6*A_PtrSize)
@@ -51,8 +52,40 @@ GuiSplash()
 
 ; setup key hooks...
 
+; Switch to specific desktop.
+!1:: ; alt-1
+    SwitchToDesktop(1)
+Return
+!2:: ; alt-2
+    SwitchToDesktop(2)
+Return
+!3:: ; alt-3
+    SwitchToDesktop(3)
+Return
+!4:: ; alt-4
+    SwitchToDesktop(4)
+Return
+!5:: ; alt-5
+    SwitchToDesktop(5)
+Return
+!6:: ; alt-6
+    SwitchToDesktop(6)
+Return
+!7:: ; alt-7
+    SwitchToDesktop(7)
+Return
+!8:: ; alt-8
+    SwitchToDesktop(8)
+Return
+!9:: ; alt-9
+    SwitchToDesktop(9)
+Return
+!0:: ; alt-0
+    SwitchToDesktop(10)
+Return
+
 ; move to left desktop with splash.
-^#Left:: ; alt-left.
+^#Left:: ; ctrl-win-left.
     idx := CurDesktopIdx() - 1
     if (idx > 0) { ; Bounds check.
         GuiSplash() ; Display splash here to reduce delay.
@@ -63,7 +96,7 @@ GuiSplash()
 Return
 
 ; move to right desktop with splash.
-^#Right:: ; alt-right.
+^#Right:: ; ctrl-win-right.
     idx := CurDesktopIdx() + 1
     if (idx < NumDesktops()+1) { ; Bounds check.
         GuiSplash() ; Display splash here to reduce delay.
@@ -217,6 +250,17 @@ MoveToDesktop(hwnd, idx) {
     ; Do Magic...
     DllCall(_GetViewForHwnd, "UPtr", _IApplicationViewCollection, "Ptr", hwnd, "Ptr*", pView, "UInt")
     DllCall(_MoveViewToDesktop, "Ptr", _IVirtualDesktopManagerInternal, "Ptr", pView, "UPtr", DesktopPtrFromIdx(idx), "UInt")
+}
+
+; Fn Switch to desktop indicated by index.
+SwitchToDesktop(idx) {
+    global
+    if (idx < NumDesktops()+1) { ; Bounds check.
+        GuiSplash() ; Display splash here to reduce delay.
+        WinActivate, ahk_class Shell_TrayWnd ; Fixes Spurious Wakeups
+        DllCall(_SwitchDesktop, "Ptr", _IVirtualDesktopManagerInternal, "Ptr", DesktopPtrFromIdx(idx), "UInt")
+        WinActivate, A ; Fixes Spurious Wakeups
+    }
 }
 
 ; Fn to select the next highest window in z-order.
