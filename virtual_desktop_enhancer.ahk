@@ -14,7 +14,6 @@ _GetDesktopCount                 := NumGet(NumGet(_IVirtualDesktopManagerInterna
 _MoveViewToDesktop               := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+4*A_PtrSize)
 _GetCurrentDesktop               := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+6*A_PtrSize)
 _GetDesktops                     := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+7*A_PtrSize)
-_SwitchDesktop                   := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+9*A_PtrSize)
 _ImmersiveShell                  := ComObjCreate("{C2F03A33-21F5-47FA-B4BB-156362A2F239}", "{00000000-0000-0000-C000-000000000046}")
 _IApplicationViewCollection      := ComObjQuery(_ImmersiveShell,"{1841C6D7-4F9D-42C0-AF41-8747538F10E5}","{1841C6D7-4F9D-42C0-AF41-8747538F10E5}" )
 _GetViewForHwnd                  := NumGet(NumGet(_IApplicationViewCollection+0)+6*A_PtrSize)
@@ -29,7 +28,7 @@ IfExist, %I_Icon%
 OnMessage(0x7E, "WM_DISPLAYCHANGE")
 WM_DISPLAYCHANGE(wParam, lParam)
 {
-    sleep 5000 ; takes ~5 seconds for the resolution change to stabilize.
+    mSleep(5000) ; takes ~5 seconds for the resolution change to stabilize.
     Reload
 }
 
@@ -40,117 +39,210 @@ if (not A_IsAdmin)
     ExitApp
 }
 
+; initiate splash on start.
+ForkGuiSplashLoop()()
+
 ; Remove dead tray icons.
 Tray_Refresh()
 
-; initiate splash on start.
-gtitle:="Splash123"
-gDesktopNum := "" ; Splash variable.
-gsec := 0 ; counter for hiding GUI.
-gmutex := CreateMutex() ; Mutex for fixing timing issues with multiple threads.
-GuiSplash()
-
 ; setup key hooks...
 
-; Switch to specific desktop.
-!1:: ; alt-1
+;-------------------------------------------------------------------------
+; switch to specific desktop (non-animated).
+;-------------------------------------------------------------------------
+^#1::           ; ctrl-win-1
+^#Numpad1::     ; ctrl-win-Numpad1
     SwitchToDesktop(1)
 Return
-!2:: ; alt-2
+^#2::           ; ctrl-win-2
+^#Numpad2::     ; ctrl-win-Numpad2
     SwitchToDesktop(2)
 Return
-!3:: ; alt-3
+^#3::           ; ctrl-win-3
+^#Numpad3::     ; ctrl-win-Numpad3
     SwitchToDesktop(3)
 Return
-!4:: ; alt-4
+^#4::           ; ctrl-win-4
+^#Numpad4::     ; ctrl-win-Numpad4
     SwitchToDesktop(4)
 Return
-!5:: ; alt-5
+^#5::           ; ctrl-win-5
+^#Numpad5::     ; ctrl-win-Numpad5
     SwitchToDesktop(5)
 Return
-!6:: ; alt-6
+^#6::           ; ctrl-win-6
+^#Numpad6::     ; ctrl-win-Numpad6
     SwitchToDesktop(6)
 Return
-!7:: ; alt-7
+^#7::           ; ctrl-win-7
+^#Numpad7::     ; ctrl-win-Numpad7
     SwitchToDesktop(7)
 Return
-!8:: ; alt-8
+^#8::           ; ctrl-win-8
+^#Numpad8::     ; ctrl-win-Numpad8
     SwitchToDesktop(8)
 Return
-!9:: ; alt-9
+^#9::           ; ctrl-win-9
+^#Numpad9::     ; ctrl-win-Numpad9
     SwitchToDesktop(9)
 Return
-!0:: ; alt-0
+^#0::           ; ctrl-win-0
+^#Numpad0::     ; ctrl-win-Numpad0
     SwitchToDesktop(10)
 Return
 
-; move to left desktop with splash.
-^#Left:: ; ctrl-win-left.
-    idx := CurDesktopIdx() - 1
-    if (idx > 0) { ; Bounds check.
-        GuiSplash() ; Display splash here to reduce delay.
-        Send {LWin down}{Ctrl down}{Left down} ; Separated for spurious wakeups.
-        WinActivate, A ; Fixes Spurious Wakeups.
-        Send {LWin up}{Ctrl up}{Left up}
-    }
+;-------------------------------------------------------------------------
+; move active window to specific desktop (no splash)..
+;-------------------------------------------------------------------------
+!#1::           ; win-alt-1
+!#Numpad1::     ; win-alt-Numpad1
+    MoveActiveWindowToDesktop(1)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
 Return
 
-; move to right desktop with splash.
-^#Right:: ; ctrl-win-right.
-    idx := CurDesktopIdx() + 1
-    if (idx < NumDesktops()+1) { ; Bounds check.
-        GuiSplash() ; Display splash here to reduce delay.
-        Send {LWin down}{Ctrl down}{Right down} ; Separated for spurious wakeups.
-        WinActivate, A ; Fixes Spurious Wakeups.
-        Send {LWin up}{Ctrl up}{Right up}
-}
+!#2::           ; win-alt-2
+!#Numpad2::     ; win-alt-Numpad2
+    MoveActiveWindowToDesktop(2)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
 Return
 
+!#3::           ; win-alt-3
+!#Numpad3::     ; win-alt-Numpad3
+    MoveActiveWindowToDesktop(3)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+Return
+
+!#4::           ; win-alt-4
+!#Numpad4::     ; win-alt-Numpad4
+    MoveActiveWindowToDesktop(4)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+Return
+
+!#5::           ; win-alt-5
+!#Numpad5::     ; win-alt-Numpad5
+    MoveActiveWindowToDesktop(5)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+Return
+
+!#6::           ; win-alt-6
+!#Numpad6::     ; win-alt-Numpad6
+    MoveActiveWindowToDesktop(6)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+Return
+
+!#7::           ; win-alt-7
+!#Numpad7::     ; win-alt-Numpad7
+    MoveActiveWindowToDesktop(7)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+Return
+
+!#8::           ; win-alt-8
+!#Numpad8::     ; win-alt-Numpad8
+    MoveActiveWindowToDesktop(8)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+Return
+
+!#9::           ; win-alt-9
+!#Numpad9::     ; win-alt-Numpad9
+    MoveActiveWindowToDesktop(9)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+Return
+
+!#0::           ; win-alt-0
+!#Numpad0::     ; win-alt-Numpad0
+    MoveActiveWindowToDesktop(10)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+Return
+
+;-------------------------------------------------------------------------
+; move active window to specific desktop and follow (non-animated).
+;-------------------------------------------------------------------------
+^!#1::          ; ctrl-win-alt-1.
+^!#Numpad1::    ; ctrl-win-alt-Numpad1
+    MoveActiveWindowToDesktop(1)
+    SwitchToDesktop(1)
+Return
+^!#2::          ; ctrl-win-alt-2.
+^!#Numpad2::    ; ctrl-win-alt-Numpad1
+    MoveActiveWindowToDesktop(2)
+    SwitchToDesktop(2)
+Return
+^!#3::          ; ctrl-win-alt-3.
+^!#Numpad3::    ; ctrl-win-alt-Numpad1
+    MoveActiveWindowToDesktop(3)
+    SwitchToDesktop(3)
+Return
+^!#4::          ; ctrl-win-alt-4.
+^!#Numpad4::    ; ctrl-win-alt-Numpad1
+    MoveActiveWindowToDesktop(4)
+    SwitchToDesktop(4)
+Return
+^!#5::          ; ctrl-win-alt-5.
+^!#Numpad5::    ; ctrl-win-alt-Numpad1
+    MoveActiveWindowToDesktop(5)
+    SwitchToDesktop(5)
+Return
+^!#6::          ; ctrl-win-alt-6.
+^!#Numpad6::    ; ctrl-win-alt-Numpad1
+    MoveActiveWindowToDesktop(6)
+    SwitchToDesktop(6)
+Return
+^!#7::          ; ctrl-win-alt-7.
+^!#Numpad7::    ; ctrl-win-alt-Numpad7
+    MoveActiveWindowToDesktop(7)
+    SwitchToDesktop(7)
+Return
+^!#8::          ; ctrl-win-alt-8.
+^!#Numpad8::    ; ctrl-win-alt-Numpad8
+    MoveActiveWindowToDesktop(8)
+    SwitchToDesktop(8)
+Return
+^!#9::          ; ctrl-win-alt-9.
+^!#Numpad9::    ; ctrl-win-alt-Numpad9
+    MoveActiveWindowToDesktop(9)
+    SwitchToDesktop(9)
+Return
+^!#0::          ; ctrl-win-alt-0.
+^!#Numpad0::    ; ctrl-win-alt-Numpad0
+    MoveActiveWindowToDesktop(0)
+    SwitchToDesktop(10)
+Return
+
+;-------------------------------------------------------------------------
 ; move active window to left desktop (no splash).
-!#Left:: ; win-alt-left.
-    idx := CurDesktopIdx() - 1
-    if (idx > 0) { ; Bounds check.
-        WinGet, hwnd, ID, A
-        MoveToDesktop(hwnd, idx)
-        SelectNextWindow() ; allows all windows on a desktop be moved easily.
-    }
+;-------------------------------------------------------------------------
+!#Left::        ; win-alt-left.
+    MoveActiveWindowToDesktop(CurDesktopIdx() - 1)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
 Return
 
+;-------------------------------------------------------------------------
 ; move active window to right desktop (no splash).
-!#Right:: ; win-alt-right.
-    idx := CurDesktopIdx() + 1
-    if (idx < NumDesktops()+1) { ; Bounds check.
-        WinGet, hwnd, ID, A
-        MoveToDesktop(hwnd, idx)
-        SelectNextWindow() ; allows all windows on a desktop be moved easily.
-    }
+;-------------------------------------------------------------------------
+!#Right::       ; win-alt-right.
+    MoveActiveWindowToDesktop(CurDesktopIdx() + 1)
+    SelectNextWindow() ; allows all windows on a desktop be moved easily.
 Return
 
-; move active window to left desktop and follow.
-^!#Left:: ; ctrl-win-alt-left.
+;-------------------------------------------------------------------------
+; move active window to left desktop and follow (animated).
+;-------------------------------------------------------------------------
+^!#Left::       ; ctrl-win-alt-left.
     idx := CurDesktopIdx() - 1
-    if (idx > 0) { ; Bounds check.
-        WinGet, hwnd, ID, A
-        MoveToDesktop(hwnd, idx)
-        GuiSplash() ; Display splash here to reduce delay.
-        Send {LWin down}{Ctrl down}{Left down}
-        WinActivate, ahk_id %hwnd%
-        Send {LWin up}{Ctrl up}{Left up}
-    }
+    MoveActiveWindowToDesktop(idx)
+    SwitchToDesktop(idx)
 Return
 
-; move active window to right desktop and follow.
-^!#Right:: ; ctrl-win-alt-right.
+;-------------------------------------------------------------------------
+; move active window to right desktop and follow (animated)..
+;-------------------------------------------------------------------------
+^!#Right::      ; ctrl-win-alt-right.
     idx := CurDesktopIdx() + 1
-    if (idx < NumDesktops()+1) { ; Bounds check.
-        WinGet, hwnd, ID, A
-        MoveToDesktop(hwnd, idx)
-        GuiSplash() ; Display splash here to reduce delay.
-        Send {LWin down}{Ctrl down}{Right down}
-        WinActivate, ahk_id %hwnd%
-        Send {LWin up}{Ctrl up}{Right up}
-    }
+    MoveActiveWindowToDesktop(idx)
+    SwitchToDesktop(idx)
 Return
+
+;-------------------------------------------------------------------------
 
 ; Fn to Remove dead tray icons.
 Tray_Refresh() {
@@ -240,26 +332,34 @@ DesktopGUIDFromPtr(ptr) {
 }
 
 ; Fn to move a window to the desktop indicated by index.
-MoveToDesktop(hwnd, idx) {
+MoveActiveWindowToDesktop(idx) {
     global
 
-    ; Check window IDs (only attempt to move "valid" windows.)
-    if not (IsValidWindow(hwnd))
-        return False
+    if (idx > 0 && idx < NumDesktops()+1 && idx != CurDesktopIdx()) { ; Bounds check.
+        ; Check window IDs (only attempt to move "valid" windows.)
+        if not (IsValidWindow(hwnd))
+            return False
 
-    ; Do Magic...
-    DllCall(_GetViewForHwnd, "UPtr", _IApplicationViewCollection, "Ptr", hwnd, "Ptr*", pView, "UInt")
-    DllCall(_MoveViewToDesktop, "Ptr", _IVirtualDesktopManagerInternal, "Ptr", pView, "UPtr", DesktopPtrFromIdx(idx), "UInt")
+        ; Do Magic...
+        DllCall(_GetViewForHwnd, "UPtr", _IApplicationViewCollection, "Ptr", hwnd, "Ptr*", pView, "UInt")
+        DllCall(_MoveViewToDesktop, "Ptr", _IVirtualDesktopManagerInternal, "Ptr", pView, "UPtr", DesktopPtrFromIdx(idx), "UInt")
+    }
 }
 
 ; Fn Switch to desktop indicated by index.
 SwitchToDesktop(idx) {
-    global
-    if (idx < NumDesktops()+1) { ; Bounds check.
-        GuiSplash() ; Display splash here to reduce delay.
-        WinActivate, ahk_class Shell_TrayWnd ; Fixes Spurious Wakeups
-        DllCall(_SwitchDesktop, "Ptr", _IVirtualDesktopManagerInternal, "Ptr", DesktopPtrFromIdx(idx), "UInt")
-        WinActivate, A ; Fixes Spurious Wakeups
+    if (idx > 0 && idx < NumDesktops()+1  && idx != CurDesktopIdx()) { ; Bounds check.
+        diff := idx - CurDesktopIdx()
+        if (diff < 0)
+            dir := "Left"
+        else
+            dir := "Right"
+        diff := abs(diff)
+        loop %diff% {
+            Send {LWin down}{Ctrl down}{%dir% down} ; Separated to fix spurious wakeups.
+            mSleep(50)
+            Send {LWin up}{Ctrl up}{%dir% up}
+        }
     }
 }
 
@@ -331,79 +431,69 @@ IsWindowOnCurrentVirtualDesktop(hwnd) {
     return val ? true : false
 }
 
-; Fn to create a mutex. Thanks AutoHotKey for not having locks but having threading?
-CreateMutex() {
-    return DllCall("CreateMutex", Ptr, 0, Int, False, Ptr, 0, Ptr)
+; Resize Text for GUI.
+SetTextAndResize(controlHwnd, newText) {
+    Gui 9:Font, S120 w2000, "Verdana"
+    Gui 9:Add, Text, cWhite, %newText%
+    GuiControlGet T, 9:Pos, Static1
+    Gui 9:Destroy
+
+    GuiControl,, %controlHwnd%, %newText%
+    GuiControl Move, %controlHwnd%, % "h" TH " w" TW
 }
 
-; Fn to lock a mutex. Thanks AutoHotKey for not having locks but having threading?
-lock(mutex) { ; LOL safety first.
-    DllCall("WaitForSingleObject", Ptr, mutex, Int, -1) ; INFINITE
-}
+; Accurate sleep.
+mSleep(ms) {
+    static lazy
+    if (lazy != True) {
+        DllCall("Winmm.dll\timeBeginPeriod", UInt, 1)
+        lazy := True
+    }
 
-; Fn to unlock a mutex. Thanks AutoHotKey for not having locks but having threading?
-unlock(mutex) {
-    DllCall("ReleaseMutex", Ptr, mutex)
+    DllCall("Sleep", UInt, ms)
 }
 
 ; Splash screen
-GuiSplash() {
-    global
+ForkGuiSplashLoop() {
+    title:="Splash123"
+    global gDesktopNum := "" ; Splash variable.
+    Gui, +E0x08000000 ; No-activate style
+    Gui, Color, 0000FF
+    Gui, +ToolWindow -Caption +AlwaysOnTop
+    Gui, Font, S120 w2000, "Verdana"
+    static idx = CurDesktopIdx()
+    Gui, Add, Text, cWhite vgDesktopNum, %idx%
+    Gui, Show, Center NA, %title%
+    WinSet, Transparent, 75, %title%
+    Gui, Hide
 
-    ; Lazy create GUI.
-    if not (WinExist(gtitle)) {
-        Gui, +E0x08000000 ; No-activate style
-        Gui, Color, 0000FF
-        Gui, +ToolWindow -Caption +AlwaysOnTop
-        Gui, Font, S120 w2000, "Verdana"
-        _idx := CurDesktopIdx()
-        Gui, Add, Text, cWhite vgDesktopNum, %_idx%
-        Gui, Show, Center NA, %gtitle%
-        WinSet, Transparent, 75, %gtitle%
-        Gui, Hide
-        return
-    }
-
-    ; Update Gui display before starting update thread.
-    _idx := CurDesktopIdx()
-    GuiControl,,vgDesktopNum, %_idx%
-    Gui, Show, NA, %gtitle%
-
-    ; Start thread that will setup timer (Don't stall this thread).
-    SetTimer, guiHelp, % 10 ; trigger next gui at 10ms interval (only once though).
-
-    ; Thread for starting guiUpdater.
-    guiHelp:
-        ; Lock for consistency. We don't want to modify the guiUpdater timer if its thread currently running.
-        lock(gmutex)
-        SetTimer, guiHelp, off
-        SetTimer, guiUpdater, % 10 ; trigger next gui at 10ms interval.
-        unlock(gmutex)
-        Return
+    ; Start thread that will update splash (Don't stall this thread).
+    SetTimer, guiUpdater, % 10 ; trigger next gui at 10ms interval.
 
     ; Thread for updating the GUI.
     guiUpdater:
-        ; Lock for consistency. We shouldn't be running until the guiHelp thread has setup our timer.
-        lock(gmutex)
-        static idx_store := 0 ; store the last known state.
-        gsec := gsec + 10 ; increment the time for hiding the splash.
+        loop {
+            mSleep(20)
+            static sec := 0 ; counter for hiding GUI.
+            static idx_store := 0 ; store the last known state.
+            sec := sec + 20 ; increment the time for hiding the splash.
 
-        ; Check if the desktop number has changed then update (Avoids Visual blinking).
-        _idx := CurDesktopIdx()
-        if (_idx != idx_store) {
-            gsec := 0 ; Reset Counter.
-            idx_store := _idx
-            GuiControl,,gDesktopNum, %_idx%
-            Gui, Show, NA, %gtitle%
-        }
+            ; Check if the desktop number has changed then update (Avoids Visual blinking).
+            idx := CurDesktopIdx()
+            if (idx != idx_store && idx is number) {
+                sec := 0 ; Reset Counter.
+                idx_store := idx
+                GuiControl,,gDesktopNum, %idx%
+                GuiControlGet, hwnd, Hwnd, gDesktopNum
+                SetTextAndResize(hwnd, idx)
+                Gui, Show, NA AutoSize, %title%
+            }
 
-        ; Hide the splash after 1000ms.
-        if (gsec >= 650) {
-            gsec := 0 ; Reset counter.
-            idx_store := 0
-            SetTimer, guiUpdater, off
-            Gui, Hide
+            ; Hide the splash after 1000ms.
+            if (sec >= 650) {
+                sec := 0 ; Reset counter.
+                Gui, Hide
+            }
         }
-        unlock(gmutex)
         Return
 }
