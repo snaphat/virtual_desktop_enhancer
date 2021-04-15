@@ -40,7 +40,7 @@ if (not A_IsAdmin)
 }
 
 ; initiate splash on start.
-ForkGuiSplashLoop()()
+ForkGuiSplashLoop()
 
 ; Remove dead tray icons.
 Tray_Refresh()
@@ -97,61 +97,61 @@ Return
 !#1::           ; win-alt-1
 !#Numpad1::     ; win-alt-Numpad1
     MoveActiveWindowToDesktop(1)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(1) ; allows all windows on a desktop be moved easily.
 Return
 
 !#2::           ; win-alt-2
 !#Numpad2::     ; win-alt-Numpad2
     MoveActiveWindowToDesktop(2)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(2) ; allows all windows on a desktop be moved easily.
 Return
 
 !#3::           ; win-alt-3
 !#Numpad3::     ; win-alt-Numpad3
     MoveActiveWindowToDesktop(3)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(3) ; allows all windows on a desktop be moved easily.
 Return
 
 !#4::           ; win-alt-4
 !#Numpad4::     ; win-alt-Numpad4
     MoveActiveWindowToDesktop(4)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(4) ; allows all windows on a desktop be moved easily.
 Return
 
 !#5::           ; win-alt-5
 !#Numpad5::     ; win-alt-Numpad5
     MoveActiveWindowToDesktop(5)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(5) ; allows all windows on a desktop be moved easily.
 Return
 
 !#6::           ; win-alt-6
 !#Numpad6::     ; win-alt-Numpad6
     MoveActiveWindowToDesktop(6)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(6) ; allows all windows on a desktop be moved easily.
 Return
 
 !#7::           ; win-alt-7
 !#Numpad7::     ; win-alt-Numpad7
     MoveActiveWindowToDesktop(7)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(7) ; allows all windows on a desktop be moved easily.
 Return
 
 !#8::           ; win-alt-8
 !#Numpad8::     ; win-alt-Numpad8
     MoveActiveWindowToDesktop(8)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(8) ; allows all windows on a desktop be moved easily.
 Return
 
 !#9::           ; win-alt-9
 !#Numpad9::     ; win-alt-Numpad9
     MoveActiveWindowToDesktop(9)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(9) ; allows all windows on a desktop be moved easily.
 Return
 
 !#0::           ; win-alt-0
 !#Numpad0::     ; win-alt-Numpad0
     MoveActiveWindowToDesktop(10)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    SelectNextWindow(10) ; allows all windows on a desktop be moved easily.
 Return
 
 ;-------------------------------------------------------------------------
@@ -204,24 +204,42 @@ Return
 Return
 ^!#0::          ; ctrl-win-alt-0.
 ^!#Numpad0::    ; ctrl-win-alt-Numpad0
-    MoveActiveWindowToDesktop(0)
+    MoveActiveWindowToDesktop(10)
     SwitchToDesktop(10)
+Return
+
+;-------------------------------------------------------------------------
+; switch to left desktop.
+;-------------------------------------------------------------------------
+^#Left::       ; ctrl-win-left.
+    idx := CurDesktopIdx() - 1
+    SwitchToDesktop(idx)
+Return
+
+;-------------------------------------------------------------------------
+; Switch to right desktop.
+;-------------------------------------------------------------------------
+^#Right::      ; ctrl-win-right.
+    idx := CurDesktopIdx() + 1
+    SwitchToDesktop(idx)
 Return
 
 ;-------------------------------------------------------------------------
 ; move active window to left desktop (no splash).
 ;-------------------------------------------------------------------------
 !#Left::        ; win-alt-left.
-    MoveActiveWindowToDesktop(CurDesktopIdx() - 1)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    idx := CurDesktopIdx() - 1
+    MoveActiveWindowToDesktop(idx)
+    SelectNextWindow(idx) ; allows all windows on a desktop be moved easily.
 Return
 
 ;-------------------------------------------------------------------------
 ; move active window to right desktop (no splash).
 ;-------------------------------------------------------------------------
 !#Right::       ; win-alt-right.
-    MoveActiveWindowToDesktop(CurDesktopIdx() + 1)
-    SelectNextWindow() ; allows all windows on a desktop be moved easily.
+    idx := CurDesktopIdx() + 1
+    MoveActiveWindowToDesktop(idx)
+    SelectNextWindow(idx) ; allows all windows on a desktop be moved easily.
 Return
 
 ;-------------------------------------------------------------------------
@@ -282,7 +300,12 @@ Tray_Refresh() {
 ; Fn to get number of desktops.
 NumDesktops() {
     global
+
     DllCall(_GetDesktopCount, "Ptr", _IVirtualDesktopManagerInternal, "UInt*", desktopCount)
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     return desktopCount
 }
 
@@ -294,17 +317,35 @@ CurDesktopIdx() {
 ; Fn to get the current virtual desktop from an index.
 CurDesktopPtr() {
     global
+
     DllCall(_GetCurrentDesktop, "UPtr", _IVirtualDesktopManagerInternal, "UPtrP", ptr, "Uint")
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     return ptr
 }
 
 ; Fn to get a virtual desktop from an index.
 DesktopPtrFromIdx(index) {
     global
+
     VarSetCapacity(GUID, 16)
     DllCall(_GetDesktops, "UPtr", _IVirtualDesktopManagerInternal, "UPtrP", IObjectArray, "UInt")
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     DllCall("Ole32.dll\CLSIDFromString", "Str", "{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}", "UPtr", &GUID)
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     DllCall(NumGet(NumGet(IObjectArray+0)+4*A_PtrSize), "UPtr", IObjectArray, "UInt", index-1, "UPtr", &GUID, "UPtrP", ptr, "UInt")  ; IObjectArray::GetAt
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     return ptr
 }
 
@@ -327,7 +368,15 @@ DesktopGUIDFromPtr(ptr) {
     VarSetCapacity(GUID, 16)
     VarSetCapacity(strGUID, (38 + 1) * 2)
     DllCall(NumGet(NumGet(ptr+0)+4*A_PtrSize), "UPtr", ptr, "UPtr", &GUID, "UInt")
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     DllCall("Ole32.dll\StringFromGUID2", "UPtr", &GUID, "UPtr", &strGUID, "Int", 38 + 1)
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     return StrGet(&strGUID, "UTF-16")
 }
 
@@ -337,12 +386,18 @@ MoveActiveWindowToDesktop(idx) {
 
     if (idx > 0 && idx < NumDesktops()+1 && idx != CurDesktopIdx()) { ; Bounds check.
         ; Check window IDs (only attempt to move "valid" windows.)
-        if not (IsValidWindow(hwnd))
+        WinGet, hwnd, ID, A
+        if not (IsValidWindow(hwnd)) {
             return False
+        }
 
         ; Do Magic...
         DllCall(_GetViewForHwnd, "UPtr", _IApplicationViewCollection, "Ptr", hwnd, "Ptr*", pView, "UInt")
+        if ErrorLevel
+            MsgBox,,, Error in %A_ThisFunc% at %A_LineNumber%
         DllCall(_MoveViewToDesktop, "Ptr", _IVirtualDesktopManagerInternal, "Ptr", pView, "UPtr", DesktopPtrFromIdx(idx), "UInt")
+        if ErrorLevel
+            MsgBox,,, Error in %A_ThisFunc% at %A_LineNumber%
     }
 }
 
@@ -364,23 +419,27 @@ SwitchToDesktop(idx) {
 }
 
 ; Fn to select the next highest window in z-order.
-SelectNextWindow() {
+SelectNextWindow(idx) {
     ; Iterate windows in z-order.
-    foundWindow := false
-    WinGet, hwnd, ID, A
-    Loop {
-        hwnd := DllCall("GetWindow",uint,hwnd,int,2) ; 2 = GW_HWNDNEXT
-        hwnd := hwnd // 1
+    if (idx > 0 && idx < NumDesktops()+1 && idx != CurDesktopIdx()) { ; Bounds check.
+        foundWindow := false
+        WinGet, hwnd, ID, A
+        Loop {
+            hwnd := DllCall("GetWindow",uint,hwnd,int,2) ; 2 = GW_HWNDNEXT
+            if ErrorLevel
+                MsgBox,,, Error in %A_ThisFunc% at %A_LineNumber%
+            hwnd := hwnd // 1
 
-        if (hwnd == 0)
-            break  ; Ran out of windows.
+            if (hwnd == 0)
+                break  ; Ran out of windows.
 
-        if not (IsWindowOnCurrentVirtualDesktop(hwnd))
-            continue ; Continue if window not on current desktop (or invalid).
+            if not (IsWindowOnCurrentVirtualDesktop(hwnd))
+                continue ; Continue if window not on current desktop (or invalid).
 
-        foundWindow := true
-        WinActivate, ahk_id %hwnd% ; Activate next z-order window on current virtual desktop.
-        break
+            foundWindow := true
+            WinActivate, ahk_id %hwnd% ; Activate next z-order window on current virtual desktop.
+            break
+        }
     }
 }
 
@@ -392,6 +451,10 @@ IsValidWindow(hwnd) {
 
     VarSetCapacity(cloaked,4, 0)
     DllCall("dwmapi\DwmGetWindowAttribute" , "Ptr", hwnd ,"UInt", 14, "Ptr", &cloaked, "UInt", 4)
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     val := NumGet(cloaked, "UInt") ; DWMWA_CLOAKED value.
     if (val != 0) ; Needed for weeding out Windows10 Apps that are sleeping.
         return False ; Window is Cloaked.
@@ -421,12 +484,17 @@ IsValidWindow(hwnd) {
 ; Fn to check if a window is on the current virtual desktop.
 IsWindowOnCurrentVirtualDesktop(hwnd) {
     global
+
     if not IsValidWindow(hwnd)
         return False ; not a valid Window.
 
     ; Do Magic...
     VarSetCapacity(val, 4, 0)
     DllCall(_IsWindowOnCurrentVirtualDesktop, "Ptr", _IVirtualDesktopManager, "Ptr", hwnd, "Ptr" , &val)
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
     val := NumGet(&val, "BOOL")
     return val ? true : false
 }
@@ -447,10 +515,16 @@ mSleep(ms) {
     static lazy
     if (lazy != True) {
         DllCall("Winmm.dll\timeBeginPeriod", UInt, 1)
+        if ErrorLevel
+            MsgBox,,, Error in %A_ThisFunc% at %A_LineNumber%
         lazy := True
     }
 
     DllCall("Sleep", UInt, ms)
+    if ErrorLevel {
+        line := A_LineNumber - 2
+        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+    }
 }
 
 ; Splash screen
@@ -461,8 +535,7 @@ ForkGuiSplashLoop() {
     Gui, Color, 0000FF
     Gui, +ToolWindow -Caption +AlwaysOnTop
     Gui, Font, S120 w2000, "Verdana"
-    static idx = CurDesktopIdx()
-    Gui, Add, Text, cWhite vgDesktopNum, %idx%
+    Gui, Add, Text, cWhite vgDesktopNum,
     Gui, Show, Center NA, %title%
     WinSet, Transparent, 75, %title%
     Gui, Hide
