@@ -14,23 +14,43 @@ Adds QoL improvements to Windows Virtual Desktop Implementation.
 ## Usage
 
 | Shortcut Keys      | Description                                               |
-|--------------------|-----------------------------------------------------------|
-| alt-1              | Switch to the virtual desktop 1.                          |
-| alt-2              | Switch to the virtual desktop 2.                          |
-| alt-3              | Switch to the virtual desktop 3.                          |
-| alt-4              | Switch to the virtual desktop 4.                          |
-| alt-5              | Switch to the virtual desktop 5.                          |
-| alt-6              | Switch to the virtual desktop 6.                          |
-| alt-7              | Switch to the virtual desktop 7.                          |
-| alt-8              | Switch to the virtual desktop 8.                          |
-| alt-9              | Switch to the virtual desktop 9.                          |
-| alt-0              | Switch to the virtual desktop 10.                         |
-| ctrl-Win-Left      | Switch to the virtual desktop on the left.                |
-| ctrl-Win-Right     | Switch to the virtual desktop on the right.               |
+|--------------------|---------------------------------------------------------- |
+| Ctrl-Win-1         | Switch to the virtual desktop 1.                          |
+| Ctrl-Win-2         | Switch to the virtual desktop 2.                          |
+| Ctrl-Win-3         | Switch to the virtual desktop 3.                          |
+| Ctrl-Win-4         | Switch to the virtual desktop 4.                          |
+| Ctrl-Win-5         | Switch to the virtual desktop 5.                          |
+| Ctrl-Win-6         | Switch to the virtual desktop 6.                          |
+| Ctrl-Win-7         | Switch to the virtual desktop 7.                          |
+| Ctrl-Win-8         | Switch to the virtual desktop 8.                          |
+| Ctrl-Win-9         | Switch to the virtual desktop 9.                          |
+| Ctrl-Win-0         | Switch to the virtual desktop 10.                         |
+| Ctrl-Win-Left      | Switch to the virtual desktop on the left.                |
+| Ctrl-Win-Right     | Switch to the virtual desktop on the right.               |
+| Win-Alt-1          | Move window to the virtual desktop 1.                     |
+| Win-Alt-2          | Move window to the virtual desktop 2.                     |
+| Win-Alt-3          | Move window to the virtual desktop 3.                     |
+| Win-Alt-4          | Move window to the virtual desktop 4.                     |
+| Win-Alt-5          | Move window to the virtual desktop 5.                     |
+| Win-Alt-6          | Move window to the virtual desktop 6.                     |
+| Win-Alt-7          | Move window to the virtual desktop 7.                     |
+| Win-Alt-8          | Move window to the virtual desktop 8.                     |
+| Win-Alt-9          | Move window to the virtual desktop 9.                     |
+| Win-Alt-0          | Move window to the virtual desktop 10.                    |
 | Win-Alt-Left       | Move window to the virtual desktop on the left.           |
 | Win-Alt-Right      | Move window to the virtual desktop on the right.          |
-| ctrl-Win-Alt-Left  | Move window & Switch to the virtual desktop on the left.  |
-| ctrl-Win-Alt-Right | Move window & Switch to the virtual desktop on the right. |
+| Ctrl-Win-Alt-1     | Move window & Switch to the virtual desktop 1.            |
+| Ctrl-Win-Alt-2     | Move window & Switch to the virtual desktop 2.            |
+| Ctrl-Win-Alt-3     | Move window & Switch to the virtual desktop 3.            |
+| Ctrl-Win-Alt-4     | Move window & Switch to the virtual desktop 4.            |
+| Ctrl-Win-Alt-5     | Move window & Switch to the virtual desktop 5.            |
+| Ctrl-Win-Alt-6     | Move window & Switch to the virtual desktop 6.            |
+| Ctrl-Win-Alt-7     | Move window & Switch to the virtual desktop 7.            |
+| Ctrl-Win-Alt-8     | Move window & Switch to the virtual desktop 8.            |
+| Ctrl-Win-Alt-9     | Move window & Switch to the virtual desktop 9.            |
+| Ctrl-Win-Alt-0     | Move window & Switch to the virtual desktop 10.           |
+| Ctrl-Win-Alt-Left  | Move window & Switch to the virtual desktop on the left.  |
+| Ctrl-Win-Alt-Right | Move window & Switch to the virtual desktop on the right. |
 
 To autostart virtual_desktop_enhancer on login, run:
 ```
