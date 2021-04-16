@@ -346,6 +346,7 @@ DesktopPtrFromIdx(index) {
         line := A_LineNumber - 2
         MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
     }
+    ObjRelease(IObjectArray) ; Clear comm object memory.
     return ptr
 }
 
@@ -357,7 +358,7 @@ DesktopIdxFromPtr(ptr) {
     count := NumDesktops()
     loop %count% {
         GUID := DesktopGUIDFromPtr(DesktopPtrFromIdx(A_Index))
-        if (curGUID = GUID)
+        if (curGUID == GUID)
             return A_Index
     }
     return 1 ; if failed assume first desktop.
@@ -472,7 +473,7 @@ IsValidWindow(hwnd) {
         return False ; Tool Window.
 
     WinGetClass, szClass, ahk_id %hwnd%
-    if (szClass = "TApplication")
+    if (szClass == "TApplication")
         return False ; Some delphi class window type.
 
     WinGetTitle, title, ahk_id %hwnd%
@@ -540,33 +541,28 @@ ForkGuiSplashLoop() {
     WinSet, Transparent, 75, %title%
     Gui, Hide
 
-    ; Start thread that will update splash (Don't stall this thread).
-    SetTimer, guiUpdater, % 10 ; trigger next gui at 10ms interval.
+    ; Loop to update the GUI forever.
+    loop {
+        mSleep(10)
+        static sec := 0 ; counter for hiding GUI.
+        static idx_store := 0 ; store the last known state.
+        sec := sec + 10 ; increment the time for hiding the splash.
 
-    ; Thread for updating the GUI.
-    guiUpdater:
-        loop {
-            mSleep(20)
-            static sec := 0 ; counter for hiding GUI.
-            static idx_store := 0 ; store the last known state.
-            sec := sec + 20 ; increment the time for hiding the splash.
-
-            ; Check if the desktop number has changed then update (Avoids Visual blinking).
-            idx := CurDesktopIdx()
-            if (idx != idx_store && idx is number) {
-                sec := 0 ; Reset Counter.
-                idx_store := idx
-                GuiControl,,gDesktopNum, %idx%
-                GuiControlGet, hwnd, Hwnd, gDesktopNum
-                SetTextAndResize(hwnd, idx)
-                Gui, Show, NA AutoSize, %title%
-            }
-
-            ; Hide the splash after 1000ms.
-            if (sec >= 650) {
-                sec := 0 ; Reset counter.
-                Gui, Hide
-            }
+        ; Check if the desktop number has changed then update (Avoids Visual blinking).
+        idx := CurDesktopIdx()
+        if (idx != idx_store && idx is number) {
+            sec := 0 ; Reset Counter.
+            idx_store := idx
+            GuiControl,,gDesktopNum, %idx%
+            GuiControlGet, hwnd, Hwnd, gDesktopNum
+            SetTextAndResize(hwnd, idx)
+            Gui, Show, NA AutoSize, %title%
         }
-        Return
+
+        ; Hide the splash after 1000ms.
+        if (sec >= 650) {
+            sec := 0 ; Reset counter.
+            Gui, Hide
+        }
+    }
 }
