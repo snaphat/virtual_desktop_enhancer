@@ -477,7 +477,7 @@ IsValidWindow(hwnd) {
         return False ; Tool Window.
 
     WinGetClass, szClass, ahk_id %hwnd%
-    if (szClass == "TApplication")
+    if ((szClass == "TApplication") || (szClass == "Windows.UI.Core.CoreWindow"))
         return False ; Some delphi class window type.
 
     WinGetTitle, title, ahk_id %hwnd%
