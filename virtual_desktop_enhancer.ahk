@@ -14,6 +14,7 @@ _GetDesktopCount                 := NumGet(NumGet(_IVirtualDesktopManagerInterna
 _MoveViewToDesktop               := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+4*A_PtrSize)
 _GetCurrentDesktop               := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+6*A_PtrSize)
 _GetDesktops                     := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+7*A_PtrSize)
+_SwitchDesktop                   := NumGet(NumGet(_IVirtualDesktopManagerInternal+0)+9*A_PtrSize)
 _ImmersiveShell                  := ComObjCreate("{C2F03A33-21F5-47FA-B4BB-156362A2F239}", "{00000000-0000-0000-C000-000000000046}")
 _IApplicationViewCollection      := ComObjQuery(_ImmersiveShell,"{1841C6D7-4F9D-42C0-AF41-8747538F10E5}","{1841C6D7-4F9D-42C0-AF41-8747538F10E5}" )
 _GetViewForHwnd                  := NumGet(NumGet(_IApplicationViewCollection+0)+6*A_PtrSize)
@@ -45,11 +46,12 @@ if (not A_IsAdmin)
 IniRead, switchShortcut,     config.ini, config, switch_to_desktop_prefix,                        ^#  ; Default: ctrl-win.
 IniRead, moveShortcut,       config.ini, config, move_active_window_to_desktop_prefix,            !#  ; Default: win-alt.
 IniRead, moveFollowShortcut, config.ini, config, move_active_window_to_desktop_and_follow_prefix, ^!# ; Default: ctrl-win-alt.
+IniRead, enableLooping,      config.ini, config, enable_desktop_looping, 0                            ; Default: off.
+IniRead, animateLooping,     config.ini, config, animate_desktop_looping, 0                           ; Default: off.
 
 ;-------------------------------------------------------------------------
 ; Map hotkeys.
 ;-------------------------------------------------------------------------
-
 Loop 10 {
     i := A_Index - 1
     HotKey %SwitchShortcut%%i%,             switchToDesktop_%i%
@@ -360,6 +362,12 @@ DesktopGUIDFromPtr(ptr) {
 MoveActiveWindowToDesktop(idx) {
     global
 
+    if (enableLooping == 1) {
+        if (idx < 1)
+            idx := NumDesktops()
+        else if (idx > NumDesktops())
+            idx := 1
+    }
     if (idx > 0 && idx < NumDesktops()+1 && idx != CurDesktopIdx()) { ; Bounds check.
         ; Check window IDs (only attempt to move "valid" windows.)
         WinGet, hwnd, ID, A
@@ -379,6 +387,30 @@ MoveActiveWindowToDesktop(idx) {
 
 ; Fn Switch to desktop indicated by index.
 SwitchToDesktop(idx) {
+    global
+
+    if (enableLooping == 1) {
+        if (idx < 1) {
+            idx := NumDesktops()
+            if (animateLooping == 0) {
+                WinActivate, ahk_class Shell_TrayWnd ; Fixes Spurious Wakeups
+                DllCall(_SwitchDesktop, "Ptr", _IVirtualDesktopManagerInternal, "Ptr", DesktopPtrFromIdx(idx), "UInt")
+                mSleep(50)
+                SelectNextWindow(1) ; Give idx = 1 so API will always succeed.
+                return
+            }
+        }
+        else if (idx > NumDesktops()) {
+            idx := 1
+            if (animateLooping == 0) {
+                ;WinActivate, ahk_class Shell_TrayWnd ; Fixes Spurious Wakeups
+                DllCall(_SwitchDesktop, "Ptr", _IVirtualDesktopManagerInternal, "Ptr", DesktopPtrFromIdx(idx), "UInt")
+                mSleep(50)
+                SelectNextWindow(1) ; Give idx = 1 so API will always succeed.
+                return
+            }
+        }
+    }
     if (idx > 0 && idx < NumDesktops()+1  && idx != CurDesktopIdx()) { ; Bounds check.
         diff := idx - CurDesktopIdx()
         if (diff < 0)
@@ -421,7 +453,6 @@ SelectNextWindow(idx) {
 
 ; Fn to check if a window handle is valid.
 IsValidWindow(hwnd) {
-
     if (hwnd == 0)
         return False ; not a valid ID.
 
