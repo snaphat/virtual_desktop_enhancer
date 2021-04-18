@@ -39,226 +39,197 @@ if (not A_IsAdmin)
     ExitApp
 }
 
-; initiate splash on start.
-ForkGuiSplashLoop()
+;-------------------------------------------------------------------------
+; Read config options in.
+;-------------------------------------------------------------------------
+IniRead, switchShortcut,     config.ini, config, switch_to_desktop_prefix,                        ^#  ; Default: ctrl-win.
+IniRead, moveShortcut,       config.ini, config, move_active_window_to_desktop_prefix,            !#  ; Default: win-alt.
+IniRead, moveFollowShortcut, config.ini, config, move_active_window_to_desktop_and_follow_prefix, ^!# ; Default: ctrl-win-alt.
 
+;-------------------------------------------------------------------------
+; Map hotkeys.
+;-------------------------------------------------------------------------
+
+Loop 10 {
+    i := A_Index - 1
+    HotKey %SwitchShortcut%%i%,             switchToDesktop_%i%
+    HotKey %SwitchShortcut%Numpad%i%,       switchToDesktop_%i%
+    HotKey %MoveShortcut%%i%,               MoveActiveWindowToDesktop_%i%
+    HotKey %MoveShortcut%Numpad%i%,         MoveActiveWindowToDesktop_%i%
+    HotKey %moveFollowShortcut%%i%,         MoveActiveWindowToDesktopAndFollow_%i%
+    HotKey %moveFollowShortcut%Numpad%i%,   MoveActiveWindowToDesktopAndFollow_%i%
+}
+HotKey %SwitchShortcut%Left,                switchToDesktop_L
+HotKey %SwitchShortcut%Right,               switchToDesktop_R
+HotKey %MoveShortcut%Left,                  MoveActiveWindowToDesktop_L
+HotKey %MoveShortcut%Right,                 MoveActiveWindowToDesktop_R
+HotKey %moveFollowShortcut%Left,            MoveActiveWindowToDesktopAndFollow_L
+HotKey %moveFollowShortcut%Right,           MoveActiveWindowToDesktopAndFollow_R
+
+;-------------------------------------------------------------------------
 ; Remove dead tray icons.
+;-------------------------------------------------------------------------
 Tray_Refresh()
+
+;-------------------------------------------------------------------------
+; initiate splash on start.
+;-------------------------------------------------------------------------
+ForkGuiSplashLoop()
 
 ; setup key hooks...
 
 ;-------------------------------------------------------------------------
-; switch to specific desktop (non-animated).
+; switch to specific desktop (non-animated) or
+; switch tp left or right desktop (animated).
 ;-------------------------------------------------------------------------
-^#1::           ; ctrl-win-1
-^#Numpad1::     ; ctrl-win-Numpad1
+SwitchToDesktop_1() {
     SwitchToDesktop(1)
-Return
-^#2::           ; ctrl-win-2
-^#Numpad2::     ; ctrl-win-Numpad2
+}
+SwitchToDesktop_2() {
     SwitchToDesktop(2)
-Return
-^#3::           ; ctrl-win-3
-^#Numpad3::     ; ctrl-win-Numpad3
+}
+SwitchToDesktop_3() {
     SwitchToDesktop(3)
-Return
-^#4::           ; ctrl-win-4
-^#Numpad4::     ; ctrl-win-Numpad4
+}
+SwitchToDesktop_4() {
     SwitchToDesktop(4)
-Return
-^#5::           ; ctrl-win-5
-^#Numpad5::     ; ctrl-win-Numpad5
+}
+SwitchToDesktop_5() {
     SwitchToDesktop(5)
-Return
-^#6::           ; ctrl-win-6
-^#Numpad6::     ; ctrl-win-Numpad6
+}
+SwitchToDesktop_6() {
     SwitchToDesktop(6)
-Return
-^#7::           ; ctrl-win-7
-^#Numpad7::     ; ctrl-win-Numpad7
+}
+SwitchToDesktop_7() {
     SwitchToDesktop(7)
-Return
-^#8::           ; ctrl-win-8
-^#Numpad8::     ; ctrl-win-Numpad8
+}
+SwitchToDesktop_8() {
     SwitchToDesktop(8)
-Return
-^#9::           ; ctrl-win-9
-^#Numpad9::     ; ctrl-win-Numpad9
+}
+SwitchToDesktop_9() {
     SwitchToDesktop(9)
-Return
-^#0::           ; ctrl-win-0
-^#Numpad0::     ; ctrl-win-Numpad0
+}
+SwitchToDesktop_0() {
     SwitchToDesktop(10)
-Return
-
-;-------------------------------------------------------------------------
-; move active window to specific desktop (no splash)..
-;-------------------------------------------------------------------------
-!#1::           ; win-alt-1
-!#Numpad1::     ; win-alt-Numpad1
-    MoveActiveWindowToDesktop(1)
-    SelectNextWindow(1) ; allows all windows on a desktop be moved easily.
-Return
-
-!#2::           ; win-alt-2
-!#Numpad2::     ; win-alt-Numpad2
-    MoveActiveWindowToDesktop(2)
-    SelectNextWindow(2) ; allows all windows on a desktop be moved easily.
-Return
-
-!#3::           ; win-alt-3
-!#Numpad3::     ; win-alt-Numpad3
-    MoveActiveWindowToDesktop(3)
-    SelectNextWindow(3) ; allows all windows on a desktop be moved easily.
-Return
-
-!#4::           ; win-alt-4
-!#Numpad4::     ; win-alt-Numpad4
-    MoveActiveWindowToDesktop(4)
-    SelectNextWindow(4) ; allows all windows on a desktop be moved easily.
-Return
-
-!#5::           ; win-alt-5
-!#Numpad5::     ; win-alt-Numpad5
-    MoveActiveWindowToDesktop(5)
-    SelectNextWindow(5) ; allows all windows on a desktop be moved easily.
-Return
-
-!#6::           ; win-alt-6
-!#Numpad6::     ; win-alt-Numpad6
-    MoveActiveWindowToDesktop(6)
-    SelectNextWindow(6) ; allows all windows on a desktop be moved easily.
-Return
-
-!#7::           ; win-alt-7
-!#Numpad7::     ; win-alt-Numpad7
-    MoveActiveWindowToDesktop(7)
-    SelectNextWindow(7) ; allows all windows on a desktop be moved easily.
-Return
-
-!#8::           ; win-alt-8
-!#Numpad8::     ; win-alt-Numpad8
-    MoveActiveWindowToDesktop(8)
-    SelectNextWindow(8) ; allows all windows on a desktop be moved easily.
-Return
-
-!#9::           ; win-alt-9
-!#Numpad9::     ; win-alt-Numpad9
-    MoveActiveWindowToDesktop(9)
-    SelectNextWindow(9) ; allows all windows on a desktop be moved easily.
-Return
-
-!#0::           ; win-alt-0
-!#Numpad0::     ; win-alt-Numpad0
-    MoveActiveWindowToDesktop(10)
-    SelectNextWindow(10) ; allows all windows on a desktop be moved easily.
-Return
-
-;-------------------------------------------------------------------------
-; move active window to specific desktop and follow (non-animated).
-;-------------------------------------------------------------------------
-^!#1::          ; ctrl-win-alt-1.
-^!#Numpad1::    ; ctrl-win-alt-Numpad1
-    MoveActiveWindowToDesktop(1)
-    SwitchToDesktop(1)
-Return
-^!#2::          ; ctrl-win-alt-2.
-^!#Numpad2::    ; ctrl-win-alt-Numpad1
-    MoveActiveWindowToDesktop(2)
-    SwitchToDesktop(2)
-Return
-^!#3::          ; ctrl-win-alt-3.
-^!#Numpad3::    ; ctrl-win-alt-Numpad1
-    MoveActiveWindowToDesktop(3)
-    SwitchToDesktop(3)
-Return
-^!#4::          ; ctrl-win-alt-4.
-^!#Numpad4::    ; ctrl-win-alt-Numpad1
-    MoveActiveWindowToDesktop(4)
-    SwitchToDesktop(4)
-Return
-^!#5::          ; ctrl-win-alt-5.
-^!#Numpad5::    ; ctrl-win-alt-Numpad1
-    MoveActiveWindowToDesktop(5)
-    SwitchToDesktop(5)
-Return
-^!#6::          ; ctrl-win-alt-6.
-^!#Numpad6::    ; ctrl-win-alt-Numpad1
-    MoveActiveWindowToDesktop(6)
-    SwitchToDesktop(6)
-Return
-^!#7::          ; ctrl-win-alt-7.
-^!#Numpad7::    ; ctrl-win-alt-Numpad7
-    MoveActiveWindowToDesktop(7)
-    SwitchToDesktop(7)
-Return
-^!#8::          ; ctrl-win-alt-8.
-^!#Numpad8::    ; ctrl-win-alt-Numpad8
-    MoveActiveWindowToDesktop(8)
-    SwitchToDesktop(8)
-Return
-^!#9::          ; ctrl-win-alt-9.
-^!#Numpad9::    ; ctrl-win-alt-Numpad9
-    MoveActiveWindowToDesktop(9)
-    SwitchToDesktop(9)
-Return
-^!#0::          ; ctrl-win-alt-0.
-^!#Numpad0::    ; ctrl-win-alt-Numpad0
-    MoveActiveWindowToDesktop(10)
-    SwitchToDesktop(10)
-Return
-
-;-------------------------------------------------------------------------
-; switch to left desktop.
-;-------------------------------------------------------------------------
-^#Left::       ; ctrl-win-left.
+}
+switchToDesktop_L() {
     idx := CurDesktopIdx() - 1
     SwitchToDesktop(idx)
-Return
-
-;-------------------------------------------------------------------------
-; Switch to right desktop.
-;-------------------------------------------------------------------------
-^#Right::      ; ctrl-win-right.
+}
+switchToDesktop_R() {
     idx := CurDesktopIdx() + 1
     SwitchToDesktop(idx)
-Return
+}
 
 ;-------------------------------------------------------------------------
+; move active window to specific desktop (no splash) or
 ; move active window to left desktop (no splash).
 ;-------------------------------------------------------------------------
-!#Left::        ; win-alt-left.
+MoveActiveWindowToDesktop_1() {
+    MoveActiveWindowToDesktop(1)
+    SelectNextWindow(1)
+}
+MoveActiveWindowToDesktop_2() {
+    MoveActiveWindowToDesktop(2)
+    SelectNextWindow(2)
+}
+MoveActiveWindowToDesktop_3() {
+    MoveActiveWindowToDesktop(3)
+    SelectNextWindow(3)
+}
+MoveActiveWindowToDesktop_4() {
+    MoveActiveWindowToDesktop(4)
+    SelectNextWindow(4)
+}
+MoveActiveWindowToDesktop_5() {
+    MoveActiveWindowToDesktop(5)
+    SelectNextWindow(5)
+}
+MoveActiveWindowToDesktop_6() {
+    MoveActiveWindowToDesktop(6)
+    SelectNextWindow(6)
+}
+MoveActiveWindowToDesktop_7() {
+    MoveActiveWindowToDesktop(7)
+    SelectNextWindow(7)
+}
+MoveActiveWindowToDesktop_8() {
+    MoveActiveWindowToDesktop(8)
+    SelectNextWindow(8)
+}
+MoveActiveWindowToDesktop_9() {
+    MoveActiveWindowToDesktop(9)
+    SelectNextWindow(9)
+}
+MoveActiveWindowToDesktop_0() {
+    MoveActiveWindowToDesktop(10)
+    SelectNextWindow(10)
+}
+MoveActiveWindowToDesktop_L() {
     idx := CurDesktopIdx() - 1
     MoveActiveWindowToDesktop(idx)
-    SelectNextWindow(idx) ; allows all windows on a desktop be moved easily.
-Return
-
-;-------------------------------------------------------------------------
-; move active window to right desktop (no splash).
-;-------------------------------------------------------------------------
-!#Right::       ; win-alt-right.
+    SelectNextWindow(idx)
+}
+MoveActiveWindowToDesktop_R() {
     idx := CurDesktopIdx() + 1
     MoveActiveWindowToDesktop(idx)
-    SelectNextWindow(idx) ; allows all windows on a desktop be moved easily.
-Return
+    SelectNextWindow(idx)
+}
 
 ;-------------------------------------------------------------------------
+; move active window to specific desktop and follow (non-animated) or
 ; move active window to left desktop and follow (animated).
 ;-------------------------------------------------------------------------
-^!#Left::       ; ctrl-win-alt-left.
+MoveActiveWindowToDesktopAndFollow_1() {
+    MoveActiveWindowToDesktop(1)
+    SwitchToDesktop(1)
+}
+MoveActiveWindowToDesktopAndFollow_2() {
+    MoveActiveWindowToDesktop(2)
+    SwitchToDesktop(2)
+}
+MoveActiveWindowToDesktopAndFollow_3() {
+    MoveActiveWindowToDesktop(3)
+    SwitchToDesktop(3)
+}
+MoveActiveWindowToDesktopAndFollow_4() {
+    MoveActiveWindowToDesktop(4)
+    SwitchToDesktop(4)
+}
+MoveActiveWindowToDesktopAndFollow_5() {
+    MoveActiveWindowToDesktop(5)
+    SwitchToDesktop(5)
+}
+MoveActiveWindowToDesktopAndFollow_6() {
+    MoveActiveWindowToDesktop(6)
+    SwitchToDesktop(6)
+}
+MoveActiveWindowToDesktopAndFollow_7() {
+    MoveActiveWindowToDesktop(7)
+    SwitchToDesktop(7)
+}
+MoveActiveWindowToDesktopAndFollow_8() {
+    MoveActiveWindowToDesktop(8)
+    SwitchToDesktop(8)
+}
+MoveActiveWindowToDesktopAndFollow_9() {
+    MoveActiveWindowToDesktop(9)
+    SwitchToDesktop(9)
+}
+MoveActiveWindowToDesktopAndFollow_0() {
+    MoveActiveWindowToDesktop(10)
+    SwitchToDesktop(10)
+}
+MoveActiveWindowToDesktopAndFollow_L() {
     idx := CurDesktopIdx() - 1
     MoveActiveWindowToDesktop(idx)
     SwitchToDesktop(idx)
-Return
-
-;-------------------------------------------------------------------------
-; move active window to right desktop and follow (animated)..
-;-------------------------------------------------------------------------
-^!#Right::      ; ctrl-win-alt-right.
+}
+MoveActiveWindowToDesktopAndFollow_R() {
     idx := CurDesktopIdx() + 1
     MoveActiveWindowToDesktop(idx)
     SwitchToDesktop(idx)
-Return
+}
 
 ;-------------------------------------------------------------------------
 
@@ -423,7 +394,7 @@ SwitchToDesktop(idx) {
     }
 }
 
-; Fn to select the next highest window in z-order.
+; Fn to select the next highest window in z-order. This allows windows to be moved easily.
 SelectNextWindow(idx) {
     ; Iterate windows in z-order.
     if (idx > 0 && idx < NumDesktops()+1 && idx != CurDesktopIdx()) { ; Bounds check.
