@@ -370,8 +370,12 @@ DesktopGUIDFromPtr(ptr) {
     VarSetCapacity(strGUID, (38 + 1) * 2)
     DllCall(NumGet(NumGet(ptr+0)+4*A_PtrSize), "UPtr", ptr, "UPtr", &GUID, "UInt")
     if ErrorLevel {
-        line := A_LineNumber - 2
-        MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+        ; This API can be racey and fail if desktops are removed
+        ; so returning -1 in the event of failure is necessary. It is a transient issue
+        ; anyway so it won't cause any issues.
+        ;line := A_LineNumber - 2
+        ;MsgBox,,, Error in function '%A_ThisFunc%' on line %line%!`n`nError: '%A_LastError%'
+        return -1
     }
     DllCall("Ole32.dll\StringFromGUID2", "UPtr", &GUID, "UPtr", &strGUID, "Int", 38 + 1)
     if ErrorLevel {
