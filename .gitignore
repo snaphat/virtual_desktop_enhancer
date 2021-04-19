@@ -1,2 +1,6 @@
 *.exe
 *.zip
+config.ini
+*.json
+*.suo
+*.sqlite
