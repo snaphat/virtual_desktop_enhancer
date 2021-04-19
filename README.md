@@ -64,13 +64,13 @@ _UNINSTALL.bat
 
 ## Configuration
 virtual_desktop_enhancer supports the ability to change hotkey prefixes and to enable desktop looping using a configuration file. In order to customize the configuration, rename `config.default.ini` to `config.ini` and edit the file as desired. Hotkey settings use the [AHK hotkey format](https://www.autohotkey.com/docs/Hotkeys.htm).
-| Setting                                          | Description                                                                   |
-|--------------------------------------------------|------------------------------------------------------------------------------ |
-| switch_to_desktop_prefix                         | Sets prefix key(s) for _Switch to virtual desktop_ hotkeys.                   |
-| move_active_window_to_desktop_prefix             | Sets prefix key(s) for _Move window to the virtual desktop_ hotkeys.          |
-| move_active_window_to_desktop_and_follow_prefix  | Sets prefix key(s) for _Move window & Switch to the virtual desktop_ hotkeys. |
-| enable_desktop_looping                           | Configures desktop looping for shortcuts. Supported values are 0 and 1.       |
-| animate_desktop_looping                          | Configures animating of desktop looping. Supported values are 0 and 1.        |
+| Setting                                          | Description                                                              |
+|--------------------------------------------------|--------------------------------------------------------------------------|
+| switch_to_desktop_prefix                         | Prefix key(s) for _Switch to virtual desktop_ hotkeys.                   |
+| move_active_window_to_desktop_prefix             | Prefix key(s) for _Move window to the virtual desktop_ hotkeys.          |
+| move_active_window_to_desktop_and_follow_prefix  | Prefix key(s) for _Move window & Switch to the virtual desktop_ hotkeys. |
+| enable_desktop_looping                           | Configures desktop looping for shortcuts.                                |
+| animate_desktop_looping                          | Configures animating of desktop looping.                                 |
 
 
 ## Images
