@@ -358,8 +358,16 @@ DesktopGUIDFromPtr(ptr) {
     return StrGet(&strGUID, "UTF-16")
 }
 
-; Fn to move a window to the desktop indicated by index.
+; Fn to move an active window to the desktop indicated by index.
 MoveActiveWindowToDesktop(idx) {
+    global
+
+    WinGet, hwnd, ID, A
+    MoveWindowToDesktop(idx, hwnd)
+}
+
+; Fn to move a given window to the desktop indicated by index.
+MoveWindowToDesktop(idx, hwnd) {
     global
 
     if (enableLooping == 1) {
@@ -370,7 +378,6 @@ MoveActiveWindowToDesktop(idx) {
     }
     if (idx > 0 && idx < NumDesktops()+1 && idx != CurDesktopIdx()) { ; Bounds check.
         ; Check window IDs (only attempt to move "valid" windows.)
-        WinGet, hwnd, ID, A
         if not (IsValidWindow(hwnd)) {
             return False
         }
